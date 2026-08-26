@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA SOSTA - AreaSosta</title>
+    <!-- Collegamento al file CSS comune -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- === AGGIUNTA PWA: Collegamento al Manifest e colore tema === -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <div class="logo-box">
+                <img src="logo.png" alt="Logo Camper" class="logo-img">
+                <h1>LA SOSTA</h1>
+            </div>
+            <p class="subtitle">Pannello di Controllo Area Sosta Camper</p>
+        </header>
+
+        <nav class="menu-grid">
+
+            <a href="modulo_mappa.html" class="menu-btn btn-verde">
+                <span class="btn-title">Mappa Stalli</span>
+                <span class="btn-sub">Gestisci i 45 stalli e prenotazioni</span>
+            </a>
+
+            <a href="modulo_calendario.html" class="menu-btn btn-blu">
+                <span class="btn-title">Calendario Stalli</span>
+                <span class="btn-sub">Vista Gantt e ricerca disponibilità</span>
+            </a>
+
+            <a href="modulo_report.html" class="menu-btn btn-arancio">
+                <span class="btn-title">Filtri Ricerca & Report PDF</span>
+                <span class="btn-sub">Visualizza situazione stalli</span>
+            </a>
+
+            <a href="modulo_transito.html" class="menu-btn btn-giallo">
+                <span class="btn-title">Solo Carico / Scarico</span>
+                <span class="btn-sub">Cliente di passaggio (7,00 €)</span>
+            </a>
+
+            <a href="modulo_gestore.html" class="menu-btn btn-scuro">
+                <span class="btn-title">Area Gestore & Incassi</span>
+                <span class="btn-sub">Accesso riservato</span>
+            </a>
+
+            <!-- PANNELLO GESTIONE DATI E BACKUP -->
+            <div
+                style="background: #fbcc8a; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 25px auto; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3
+                    style="margin-top: 0; color: #1e293b; text-align: center; border-bottom: 2px solid #414040; padding-bottom: 10px;">
+                    ⚙️ Gestione DB & Backup
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                    <!-- Scarica Backup -->
+                    <button onclick="esportaBackupDB()"
+                        style="background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📥 Scarica Backup Completo (.JSON)
+                    </button>
+
+                    <!-- Ripristina Backup -->
+                    <label
+                        style="background: #0d9488; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📤 Ripristina Database da File
+                        <input type="file" accept=".json" onchange="ripristinaBackupDB(this)" style="display: none;">
+                    </label>
+
+                    <!-- Esporta in CSV per Excel -->
+                    <button onclick="esportaCSVStalli()"
+                        style="background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📊 Esporta per Excel (.CSV)
+                    </button>
+
+                    <!-- Ripristina / Importa da CSV Excel -->
+                    <label
+                        style="background: #059669; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        📂 Importa da Excel (.CSV)
+                        <input type="file" accept=".csv" onchange="ripristinaCSVStalli(this)" style="display: none;">
+                    </label>
+
+                </div>
+            </div>
+
+        </nav>
+
+        <footer>
+            SPsoft Versione 2.1
+        </footer>
+
+    </div>
+
+    <!-- Collegamento al gestore Database Locale -->
+    <script src="db.js"></script>
+
+    <!-- === AGGIUNTA PWA: Registrazione del Service Worker === -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log("Service Worker Registrato con successo!"))
+                .catch((err) => console.log("Errore registrazione Service Worker:", err));
+        }
+    </script>
+
+</body>
+
+</html>

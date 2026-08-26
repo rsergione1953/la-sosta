@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report & Filtri - AreaSosta</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Libreria per la generazione del PDF lato client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        .report-card {
+            background: white;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #CBD5E1;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-title {
+            font-weight: bold;
+            color: #1E293B;
+            font-size: 0.95rem;
+        }
+
+        .badge-stato {
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .badge-occupato {
+            background-color: #EF4444;
+        }
+
+        .badge-prenotato {
+            background-color: #9333EA;
+        }
+
+        .badge-attesa {
+            background-color: #EAB308;
+            color: black;
+        }
+
+        .badge-disponibile {
+            background-color: #22C55E;
+        }
+
+        .report-info {
+            font-size: 0.82rem;
+            color: #475569;
+        }
+
+        .report-date {
+            font-size: 0.8rem;
+            color: #64748B;
+            font-weight: bold;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 8px;
+            align-items: center;
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            margin-bottom: 10px;
+        }
+
+        .filter-grid label {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        .filter-grid select {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #CBD5E1;
+            font-size: 0.85rem;
+            background: #F8FAFC;
+        }
+
+        /* Pulsanti filtro rapido */
+        .quick-filters {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .btn-filter-chip {
+            flex: 1;
+            padding: 8px 4px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .btn-filter-chip.active {
+            opacity: 1;
+            transform: scale(1.03);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: 2px solid #1E293B;
+        }
+
+        .chip-tutti {
+            background-color: #475569;
+            color: white;
+        }
+
+        .chip-occupato {
+            background-color: #EF4444;
+            color: white;
+        }
+
+        .chip-prenotato {
+            background-color: #9333EA;
+            color: white;
+        }
+
+        .chip-attesa {
+            background-color: #EAB308;
+            color: black;
+        }
+
+        /* Tasto PDF */
+        .btn-pdf {
+            background-color: #059669;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body style="background-color: #F7F4E9;">
+
+    <div class="container" style="max-width: 600px; margin: 0 auto; padding: 10px;">
+
+        <!-- HEADER FISSO IN ALTO -->
+        <header
+            style="position: sticky; top: 0; background-color: #F7F4E9; z-index: 100; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; margin-bottom: 15px;">
+            <a href="index.html"
+                style="text-decoration: none; background: #334155; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
+                &lt;- Menu
+            </a>
+            <h1 style="font-size: 1.2rem; margin: 0; color: #4A3525;">REPORT & FILTRI</h1>
+        </header>
+
+        <!-- SELETTORE PERIODO -->
+        <div class="filter-grid">
+            <label for="spnPeriodo">Periodo:</label>
+            <select id="spnPeriodo" onchange="applicaFiltri()">
+                <option value="TUTTI">TUTTI</option>
+                <option value="SETTIMANA">SETTIMANA</option>
+                <option value="MESE">MESE</option>
+                <option value="3 MESI">3 MESI</option>
+                <option value="ANNO">ANNO</option>
+            </select>
+        </div>
+
+        <!-- PULSANTI FILTRO RAPIDO PER STATO -->
+        <div class="quick-filters">
+            <button class="btn-filter-chip chip-tutti active"
+                onclick="impostaFiltroStato('TUTTI GLI STATI', this)">TUTTI</button>
+            <button class="btn-filter-chip chip-occupato" onclick="impostaFiltroStato('OCCUPATO', this)">🔴
+                OCCUPATI</button>
+            <button class="btn-filter-chip chip-prenotato" onclick="impostaFiltroStato('PRENOTATO', this)">🟣
+                PRENOTATI</button>
+            <button class="btn-filter-chip chip-attesa" onclick="impostaFiltroStato('ATTESA', this)">🟡 IN
+                ATTESA</button>
+        </div>
+
+        <!-- PULSANTE ESPORTA PDF -->
+        <button class="btn-pdf" onclick="esportaPDF()">
+            📄 ESPORTA REPORT IN PDF
+        </button>
+
+        <!-- CONTENITORE SCHEDE RISULTATI (AREA STAMPABILE) -->
+        <div id="areaStampa">
+            <div id="boxSchede">
+                <small style="color: #64748B; text-align: center; display: block;">Caricamento in corso...</small>
+            </div>
+        </div>
+
+        <!-- TASTO RITORNO -->
+        <a href="index.html" class="menu-btn btn-scuro" style="margin-top: 20px;">
+            <span class="btn-title">&lt;- TORNA AL MENU</span>
+        </a>
+
+    </div>
+
+    <!-- DB LOCALE -->
+    <script src="db.js"></script>
+
+    <script>
+        const TOTALE_STALLI = 45;
+        let datiFiltrati = [];
+        let statoSelezionato = 'TUTTI GLI STATI';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applicaFiltri();
+        });
+
+        function impostaFiltroStato(stato, btn) {
+            statoSelezionato = stato;
+            document.querySelectorAll('.btn-filter-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applicaFiltri();
+        }
+
+        async function applicaFiltri() {
+            const boxSchede = document.getElementById('boxSchede');
+            boxSchede.innerHTML = '';
+            datiFiltrati = [];
+
+            const pScelto = document.getElementById('spnPeriodo').value;
+
+            const oggi = new Date();
+            oggi.setHours(0, 0, 0, 0);
+
+            let dataInizioLimite = new Date(oggi);
+            let dataFineLimite = null;
+
+            if (pScelto === "SETTIMANA") {
+                dataFineLimite = new Date(oggi);
+                dataFineLimite.setDate(oggi.getDate() + 7);
+            } else if (pScelto === "MESE") {
+                dataFineLimite = new Date(oggi);
+                dataFineLimite.setDate(oggi.getDate() + 30);
+            } else if (pScelto === "3 MESI") {
+                dataFineLimite = new Date(oggi);
+                dataFineLimite.setDate(oggi.getDate() + 90);
+            } else if (pScelto === "ANNO") {
+                dataFineLimite = new Date(oggi);
+                dataFineLimite.setDate(oggi.getDate() + 365);
+            }
+
+            let stalliDB = await caricaStalliDB();
+
+            // Scansione prenotazioni
+            stalliDB.forEach(s => {
+                const numStallo = s.num_stallo || s.id;
+                const prenotazioni = s.prenotazioni || [];
+
+                prenotazioni.forEach(p => {
+                    const stato = (p.stato || 'prenotato').toUpperCase();
+
+                    if (statoSelezionato !== "TUTTI GLI STATI" && stato !== statoSelezionato) {
+                        return;
+                    }
+
+                    const dInizio = new Date(p.dal + 'T00:00:00');
+                    const dFine = new Date(p.al + 'T23:59:59');
+
+                    if (dataFineLimite && dInizio && dFine) {
+                        if (dFine < dataInizioLimite || dInizio > dataFineLimite) {
+                            return;
+                        }
+                    }
+
+                    datiFiltrati.push({
+                        num_stallo: numStallo,
+                        stallo: `Stallo S-${numStallo}`,
+                        cliente: p.nome_cliente || 'N/D',
+                        targa: p.targa ? `Targa: ${p.targa}` : 'Targa: N.D.',
+                        periodo: `Dal ${formattataData(p.dal)} al ${formattataData(p.al)}`,
+                        stato: stato,
+                        d_inizio: dInizio
+                    });
+                });
+            });
+
+            // Ordina per stallo e data
+            datiFiltrati.sort((a, b) => a.num_stallo - b.num_stallo || a.d_inizio - b.d_inizio);
+
+            if (datiFiltrati.length === 0) {
+                boxSchede.innerHTML = '<small style="color: #64748B; text-align: center; display: block; padding: 20px;">Nessun risultato trovato per questo filtro.</small>';
+                return;
+            }
+
+            popolaSchede();
+        }
+
+        function popolaSchede() {
+            const boxSchede = document.getElementById('boxSchede');
+            boxSchede.innerHTML = '';
+
+            datiFiltrati.forEach(item => {
+                let badgeClass = 'badge-prenotato';
+                if (item.stato === 'OCCUPATO') badgeClass = 'badge-occupato';
+                else if (item.stato === 'ATTESA') badgeClass = 'badge-attesa';
+
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.innerHTML = `
+                    <div class="report-header">
+                        <span class="report-title">${item.stallo}</span>
+                        <span class="badge-stato ${badgeClass}">${item.stato}</span>
+                    </div>
+                    <div class="report-info">👤 <strong>${item.cliente}</strong> | ${item.targa}</div>
+                    <div class="report-date">📅 ${item.periodo}</div>
+                `;
+                boxSchede.appendChild(card);
+            });
+        }
+
+        function formattataData(strYYYYMMDD) {
+            if (!strYYYYMMDD) return '';
+            const p = strYYYYMMDD.split('-');
+            return `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        // FUNZIONE DI ESPORTA IN PDF
+        function esportaPDF() {
+            if (datiFiltrati.length === 0) {
+                alert("Nessun dato da esportare.");
+                return;
+            }
+
+            const elementoStampa = document.getElementById('areaStampa');
+            const pScelto = document.getElementById('spnPeriodo').value;
+
+            const opzioni = {
+                margin: 10,
+                filename: `Report_Stalli_${statoSelezionato}_${pScelto}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opzioni).from(elementoStampa).save();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,317 @@
+/* === STILI GLOBALI ED ESSENZIALI APP PREDAIA === */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #EFECE6;
+    /* Sfondo grigio chiaro per evidenziare il telefono su PC */
+    color: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 10px;
+    min-height: 100vh;
+}
+
+/* Contenitore principale a dimensione Smartphone */
+.container {
+    width: 100%;
+    max-width: 360px;
+    /* Larghezza ideale per mobile */
+    background-color: #F7F4E9;
+    /* Sfondo dell'applicazione */
+    padding: 20px 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+/* Header comune */
+header {
+    margin-bottom: 25px;
+}
+
+.logo-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 5px;
+}
+
+.logo-img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+h1 {
+    color: #4A3525;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    color: #7A6959;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Pulsanti e Navigazione */
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.menu-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 10px;
+    border: none;
+    border-radius: 6px;
+    color: #FFFFFF;
+    text-decoration: none;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s ease, opacity 0.2s;
+    text-align: center;
+}
+
+.menu-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.btn-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.btn-sub {
+    font-size: 0.85rem;
+    font-weight: normal;
+    display: block;
+    opacity: 0.95;
+}
+
+/* Palette Colori Bottoni */
+.btn-verde {
+    background-color: #2E7D32;
+}
+
+.btn-blu {
+    background-color: #3182CE;
+}
+
+.btn-arancio {
+    background-color: #D97706;
+}
+
+.btn-giallo {
+    background-color: #EAB308;
+    color: #1A1A1A;
+}
+
+.btn-scuro {
+    background-color: #334155;
+}
+
+/* Footer */
+footer {
+    margin-top: 25px;
+    color: #0a0a0a;
+    font-size: 0.8rem;
+}
+
+/* === STILI CAMPI FORM E MODULI === */
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-field {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    border: 1px solid #A6A6A6;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #EDEDED 100%);
+    /* Sfumatura identica alla versione PC */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: #3182CE;
+    background: #FFFFFF;
+}
+
+.price-label {
+    font-size: 1.05rem;
+    color: #4A3525;
+    margin: 20px 0;
+    font-weight: 500;
+}
+
+.btn-grigio {
+    background-color: #9E9E9E;
+    color: #FFFFFF;
+}
+
+/* === STILI MAPPA STALLI ED EVENTI === */
+
+/* Griglia 3 Colonne per gli stalli */
+.stalli-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.stallo-card {
+    padding: 12px 5px;
+    border-radius: 4px;
+    color: #FFFFFF;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    border: none;
+    transition: transform 0.1s ease;
+}
+
+.stallo-card:active {
+    transform: scale(0.95);
+}
+
+.stallo-num {
+    font-size: 0.95rem;
+    font-weight: bold;
+    display: block;
+}
+
+.stallo-stato {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+/* CODICE COLORI STATI STALLI */
+.stato-libero {
+    background-color: #2E7D32;
+}
+
+/* Verde */
+.stato-occupato {
+    background-color: #D32F2F;
+}
+
+/* Rosso */
+.stato-prenotato {
+    background-color: #7B1FA2;
+}
+
+/* Viola */
+.stato-attesa {
+    background-color: #EAB308;
+    color: #1A1A1A;
+}
+
+/* Giallo */
+
+/* Barra Navigazione Mese */
+.month-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.btn-nav-month {
+    background-color: #3182CE;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.month-title {
+    font-weight: bold;
+    color: #4A3525;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+/* Box Clienti Sospesi (In attesa di Check-in) */
+.sospesi-box {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.sospesi-box h3 {
+    font-size: 0.9rem;
+    color: #B45309;
+    margin-bottom: 5px;
+}
+
+/* Finestra Modal / Modulo Inserimento */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #F7F4E9;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 340px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Stallo Occupato OGGI ma con Prenotazione Futura in arrivo */
+.stallo-card.stato-occupato.con-prenotazione-futura {
+    border: 3px solid #7E22CE !important;
+    /* Bordo viola marcato */
+    box-shadow: 0 0 6px rgba(126, 34, 206, 0.5);
+}
+
+/* Stato Prenotato (Viola) */
+.stallo-card.stato-prenotato {
+    background: linear-gradient(135deg, #6b21a8 0%, #7e22ce 100%) !important;
+    color: #ffffff !important;
+    border-color: #581c87 !important;
+}
+
+/* Testo dentro lo stallo prenotato */
+.stallo-card.stato-prenotato .stallo-num,
+.stallo-card.stato-prenotato .stallo-stato {
+    color: #ffffff !important;
+}

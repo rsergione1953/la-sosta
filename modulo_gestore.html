@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pannello Gestore - AreaSosta</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body style="background-color: #F7F4E9;">
+
+    <div class="container" style="max-width: 480px; padding: 15px;">
+
+        <!-- HEADER FISSO -->
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html"
+                style="text-decoration: none; background: #334155; color: white; padding: 8px 14px; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
+                &lt; Menu
+            </a>
+            <h1 style="font-size: 1.1rem; margin: 0; color: #2D3748; font-weight: bold; text-transform: uppercase;">
+                PANNELLO GESTORE</h1>
+        </header>
+
+        <!-- FORM IMPOSTAZIONI TARIFFE E PASSWORD -->
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #334155;">Sosta Standard (€/gg):</label>
+                <input type="number" step="0.50" id="cfgStandard"
+                    style="width: 50%; padding: 8px; font-size: 0.95rem; border: 1px solid #A0AEC0; border-radius: 4px; background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); text-align: right; font-weight: bold;">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #334155;">Alta Stagione (€/gg):</label>
+                <input type="number" step="0.50" id="cfgAlta"
+                    style="width: 50%; padding: 8px; font-size: 0.95rem; border: 1px solid #A0AEC0; border-radius: 4px; background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); text-align: right; font-weight: bold;">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #334155;">Carico / Scarico (€):</label>
+                <input type="number" step="0.50" id="cfgCS"
+                    style="width: 50%; padding: 8px; font-size: 0.95rem; border: 1px solid #A0AEC0; border-radius: 4px; background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); text-align: right; font-weight: bold;">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <label style="font-weight: bold; font-size: 0.9rem; color: #334155;">Nuova Password:</label>
+                <input type="password" id="cfgPassword" placeholder="Lascia vuoto se invariata"
+                    style="width: 50%; padding: 8px; font-size: 0.95rem; border: 1px solid #A0AEC0; border-radius: 4px; background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%);">
+            </div>
+
+            <button type="button" onclick="salvaImpostazioni()"
+                style="background-color: #3182CE; color: white; border: none; padding: 12px; font-weight: bold; font-size: 0.95rem; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+                SALVA IMPOSTAZIONI
+            </button>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #CBD5E1; margin: 15px 0;">
+
+        <!-- SELEZIONE PERIODO E CALCOLO INCASSI -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <label style="font-weight: bold; font-size: 0.9rem; color: #334155;">Periodo Calcolo:</label>
+            <select id="filtroPeriodo"
+                style="width: 55%; padding: 10px; font-size: 0.85rem; font-weight: bold; background-color: #4A5568; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <option value="oggi">OGGI</option>
+                <option value="settimana">SETTIMANA CORRENTE</option>
+                <option value="mese" selected>MESE CORRENTE</option>
+                <option value="anno">ANNO CORRENTE</option>
+                <option value="tutto">TUTTO LO STORICO</option>
+            </select>
+        </div>
+
+        <button type="button" onclick="calcolaIncassi()"
+            style="width: 100%; background-color: #38A169; color: white; border: none; padding: 12px; font-weight: bold; font-size: 1rem; border-radius: 4px; cursor: pointer; margin-bottom: 12px;">
+            CALCOLA INCASSI
+        </button>
+
+        <!-- ESITO CALCOLO -->
+        <div id="boxRisultato" style="text-align: center; margin-bottom: 15px;">
+            <span style="color: #2F855A; font-weight: bold; font-size: 0.9rem;">Seleziona un periodo e premi
+                Calcola</span>
+        </div>
+
+        <button type="button" onclick="esportaCSV()"
+            style="width: 100%; background-color: #2D3748; color: white; border: none; padding: 12px; font-weight: bold; font-size: 0.9rem; border-radius: 4px; cursor: pointer;">
+            ESPORTA REPORT INCASSI IN CSV
+        </button>
+
+    </div>
+
+    <!-- POPUP MODALE RICHIESTA PASSWORD -->
+    <div id="modalLogin"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 999;">
+        <div
+            style="background: #2D3748; padding: 20px; border-radius: 6px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+
+            <div
+                style="color: white; text-align: left; font-size: 0.9rem; border-bottom: 1px solid #4A5568; padding-bottom: 8px; margin-bottom: 20px;">
+                Area Riservata Gestore
+            </div>
+
+            <h3 style="color: white; font-size: 1rem; margin-bottom: 15px; font-weight: bold;">Inserisci Password
+                Gestore:</h3>
+
+            <input type="password" id="inputPwdAccesso"
+                style="width: 100%; padding: 10px; font-size: 1rem; border-radius: 4px; border: none; margin-bottom: 20px; box-sizing: border-box; background: #EDF2F7;">
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="annullaAccesso()"
+                    style="flex: 1; background: #4A5568; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    Annulla
+                </button>
+                <button onclick="verificaAccesso()"
+                    style="flex: 1; background: #38A169; color: white; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    Accedi
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            inizializzaImpostazioni();
+        });
+
+        function inizializzaImpostazioni() {
+            // Valori predefiniti se non ancora salvati
+            if (!localStorage.getItem('cfg_standard')) localStorage.setItem('cfg_standard', '18.00');
+            if (!localStorage.getItem('cfg_alta')) localStorage.setItem('cfg_alta', '25.00');
+            if (!localStorage.getItem('cfg_cs')) localStorage.setItem('cfg_cs', '7.00');
+            if (!localStorage.getItem('cfg_password')) localStorage.setItem('cfg_password', 'admin');
+
+            // Carica nei campi form
+            document.getElementById('cfgStandard').value = localStorage.getItem('cfg_standard');
+            document.getElementById('cfgAlta').value = localStorage.getItem('cfg_alta');
+            document.getElementById('cfgCS').value = localStorage.getItem('cfg_cs');
+        }
+
+        function verificaAccesso() {
+            const pwdInserita = document.getElementById('inputPwdAccesso').value;
+            const pwdCorretta = localStorage.getItem('cfg_password');
+
+            if (pwdInserita === pwdCorretta) {
+                document.getElementById('modalLogin').style.display = 'none';
+            } else {
+                alert("Password errata!");
+                document.getElementById('inputPwdAccesso').value = '';
+            }
+        }
+
+        function annullaAccesso() {
+            window.location.href = 'index.html';
+        }
+
+        function salvaImpostazioni() {
+            const std = document.getElementById('cfgStandard').value;
+            const alta = document.getElementById('cfgAlta').value;
+            const cs = document.getElementById('cfgCS').value;
+            const newPwd = document.getElementById('cfgPassword').value;
+
+            localStorage.setItem('cfg_standard', std);
+            localStorage.setItem('cfg_alta', alta);
+            localStorage.setItem('cfg_cs', cs);
+
+            if (newPwd.trim() !== "") {
+                localStorage.setItem('cfg_password', newPwd.trim());
+                document.getElementById('cfgPassword').value = '';
+                alert("Impostazioni e NUOVA PASSWORD salvate con successo!");
+            } else {
+                alert("Tariffe aggiornate con successo!");
+            }
+        }
+
+        function calcolaIncassi() {
+            const filtro = document.getElementById('filtroPeriodo').value;
+            const stalliSalvati = localStorage.getItem('areaSosta_stalli');
+
+            let totale = 0;
+            let conteggioStalli = 0;
+
+            if (stalliSalvati) {
+                const stalli = JSON.parse(stalliSalvati);
+                // Simula il calcolo conteggiando gli stalli occupati o prenotati
+                stalli.forEach(s => {
+                    if (s.stato === 'occupato' || s.stato === 'prenotato') {
+                        totale += parseFloat(localStorage.getItem('cfg_alta'));
+                        conteggioStalli++;
+                    }
+                });
+            }
+
+            const box = document.getElementById('boxRisultato');
+            box.innerHTML = `
+                <div style="background: #E6FFFA; border: 1px solid #319795; padding: 10px; border-radius: 4px; color: #234E52;">
+                    <strong>Periodo: ${filtro.toUpperCase()}</strong><br>
+                    Stalli Attivi: <strong>${conteggioStalli}</strong> | Incasso Stimato: <strong style="color: #2F855A; font-size: 1.1rem;">€ ${totale.toFixed(2)}</strong>
+                </div>
+            `;
+        }
+
+        function esportaCSV() {
+            const stalliSalvati = localStorage.getItem('areaSosta_stalli');
+            if (!stalliSalvati) {
+                alert("Nessun dato presente da esportare.");
+                return;
+            }
+
+            const stalli = JSON.parse(stalliSalvati);
+
+            // Intestazione del file CSV
+            let contenutoCSV = "Stallo;Stato;Cliente;Targa;Email\n";
+
+            // Aggiunge ogni riga di dati
+            stalli.forEach(s => {
+                contenutoCSV += `${s.id};${s.stato};"${s.cliente || ''}";"${s.targa || ''}";"${s.email || ''}"\n`;
+            });
+
+            // Crea il file scaricabile
+            const blob = new Blob([contenutoCSV], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Report_Incassi_AreaSosta_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+
+            // Avvia il download automatico
+            link.click();
+            document.body.removeChild(link);
+        }
+
+    </script>
+
+</body>
+
+</html>

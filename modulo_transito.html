@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Carico / Scarico - AreaSosta</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1 style="font-size: 1.6rem;">Solo Carico / Scarico</h1>
+        </header>
+
+        <form id="formTransito" onsubmit="salvaTransito(event)">
+
+            <!-- Campo Data -->
+            <div class="form-group">
+                <input type="date" id="data" class="input-field" required>
+            </div>
+
+            <!-- Campo Nome e Cognome -->
+            <div class="form-group">
+                <input type="text" id="nome" class="input-field" placeholder="Nome e Cognome (Obbligatorio)" required>
+            </div>
+
+            <!-- Campo Targa -->
+            <div class="form-group">
+                <input type="text" id="targa" class="input-field" placeholder="Targa (Opzionale)"
+                    style="text-transform: uppercase;">
+            </div>
+
+            <!-- Indicazione Tariffa -->
+            <div class="price-label">
+                Tariffa Fissa: 7,00 €
+            </div>
+
+            <!-- Bottoni di Azione -->
+            <div class="menu-grid">
+                <button type="submit" class="menu-btn btn-verde">
+                    <span class="btn-title">CONFERMA E REGISTRA (7,00 €)</span>
+                </button>
+
+                <a href="index.html" class="menu-btn btn-grigio">
+                    <span class="btn-title">&lt;- Torna al Menu</span>
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+    <script>
+        // Imposta automaticamente la data di oggi al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', () => {
+            const oggi = new Date().toISOString().split('T')[0];
+            document.getElementById('data').value = oggi;
+        });
+
+        // Gestione dell'invio dei dati
+        function salvaTransito(event) {
+            event.preventDefault(); // Evita il ricaricamento della pagina
+
+            const nome = document.getElementById('nome').value;
+            const targa = document.getElementById('targa').value || 'Non specificata';
+            const data = document.getElementById('data').value;
+
+            alert(`Registrazione Completata!\n\nCliente: ${nome}\nTarga: ${targa}\nData: ${data}\nImporto: 7,00 €`);
+
+            // Torna al menu principale dopo la conferma
+            window.location.href = "index.html";
+        }
+    </script>
+
+</body>
+
+</html>

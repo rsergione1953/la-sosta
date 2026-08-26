@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Stalli - AreaSosta</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER FISSO IN ALTO -->
+        <header
+            style="position: sticky; top: 0; background-color: #F7F4E9; z-index: 100; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; margin-bottom: 15px;">
+            <a href="index.html"
+                style="text-decoration: none; background: #334155; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
+                &lt;- Menu
+            </a>
+            <h1 style="font-size: 1.2rem; margin: 0; color: #4A3525;">MAPPA 45 STALLI</h1>
+        </header>
+
+        <!-- Selettore Mese/Anno -->
+        <div class="month-selector">
+            <button class="btn-nav-month" onclick="cambiaMese(-1)">&lt;</button>
+            <span class="month-title" id="labelMese">AGOSTO 2026</span>
+            <button class="btn-nav-month" onclick="cambiaMese(1)">&gt;</button>
+        </div>
+
+        <!-- Griglia 45 Stalli -->
+        <div class="stalli-grid" id="grigliaStalli"></div>
+
+        <!-- Tasto Ritorno in Fondo -->
+        <a href="index.html" class="menu-btn btn-scuro" style="margin-top: 20px;">
+            <span class="btn-title">&lt;- TORNA AL MENU</span>
+        </a>
+
+    </div>
+
+    <!-- MODALE / SCHEDA GESTIONE STALLO -->
+    <div class="modal-overlay" id="modalCliente">
+        <div class="modal-content" style="padding: 12px; border-radius: 6px; max-width: 450px; width: 90%;">
+
+            <div style="background-color: #2D3748; color: white; padding: 8px 10px; font-weight: bold; font-size: 1rem; text-align: left; margin: -12px -12px 10px -12px; border-top-left-radius: 6px; border-top-right-radius: 6px;"
+                id="modalHeaderTitolo">
+                Stallo 1 - Prenotazioni
+            </div>
+
+            <!-- Lista Prenotazioni Esistenti per lo Stallo -->
+            <div id="listaPrenotazioniStallo"
+                style="margin-bottom: 12px; max-height: 120px; overflow-y: auto; background: #f8fafc; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <!-- Popolato via JS -->
+            </div>
+
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+            <strong style="font-size: 0.85rem; color: #334155; display: block; margin-bottom: 6px;">➕ Nuova Prenotazione
+                / Check-In:</strong>
+
+            <form id="formCliente" onsubmit="event.preventDefault();">
+                <input type="hidden" id="stalloSelezionato">
+
+                <div class="form-group" style="margin-bottom: 6px;">
+                    <input type="text" id="nomeCliente" class="input-field" list="storicoAnagrafica"
+                        placeholder="Nome e Cognome"
+                        style="background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); font-size: 0.88rem; padding: 8px;">
+                    <datalist id="storicoAnagrafica"></datalist>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 6px;">
+                    <input type="text" id="targaCliente" class="input-field" placeholder="Targa (es. AB123CD)"
+                        style="text-transform: uppercase; background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); font-size: 0.88rem; padding: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 8px;">
+                    <input type="email" id="emailCliente" class="input-field" placeholder="Email (opzionale)"
+                        style="background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%); font-size: 0.88rem; padding: 8px;">
+                </div>
+
+                <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                    <div style="flex: 1; background: #CBD5E1; padding: 6px; border-radius: 4px; text-align: center;">
+                        <label
+                            style="font-size: 0.7rem; font-weight: bold; display: block; color: #334155;">Dal:</label>
+                        <input type="date" id="dataArrivo" class="input-field"
+                            style="border: none; background: transparent; font-size: 0.8rem; padding: 0; text-align: center; font-weight: bold;"
+                            onchange="calcolaTotale()">
+                    </div>
+                    <div style="flex: 1; background: #CBD5E1; padding: 6px; border-radius: 4px; text-align: center;">
+                        <label style="font-size: 0.7rem; font-weight: bold; display: block; color: #334155;">Al:</label>
+                        <input type="date" id="dataUscita" class="input-field"
+                            style="border: none; background: transparent; font-size: 0.8rem; padding: 0; text-align: center; font-weight: bold;"
+                            onchange="calcolaTotale()">
+                    </div>
+                </div>
+
+                <div
+                    style="text-align: center; margin-bottom: 12px; font-size: 0.82rem; font-weight: bold; color: #1E3A8A;">
+                    Durata: <span id="lblNotti" style="color: #15803D;">1</span> Notti | Totale: <span id="lblCosto"
+                        style="color: #15803D;">€ 25.00</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <!-- Riga 1: Check-In e Prenota -->
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="menu-btn btn-scuro"
+                            style="background-color: #DC2626; flex: 1; padding: 8px 2px; font-size: 0.8rem;"
+                            onclick="registraStato('occupato')">
+                            Check-In
+                        </button>
+                        <button type="button" class="menu-btn"
+                            style="background-color: #7E22CE; flex: 1; padding: 8px 2px; font-size: 0.8rem; color: white;"
+                            onclick="registraStato('prenotato')">
+                            Prenota
+                        </button>
+                    </div>
+
+                    <!-- Riga 2: In Attesa e Check-Out/Saldo -->
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="menu-btn"
+                            style="background-color: #D97706; flex: 1; padding: 8px 2px; font-size: 0.8rem; color: white;"
+                            onclick="registraStato('attesa')">
+                            In Attesa
+                        </button>
+                        <button type="button" class="menu-btn"
+                            style="background-color: #16A34A; flex: 1; padding: 8px 2px; font-size: 0.8rem; color: white;"
+                            onclick="effettuaCheckOut()">
+                            Check-Out / Saldo
+                        </button>
+                    </div>
+
+                    <!-- Tasto Chiudi -->
+                    <button type="button" class="menu-btn btn-grigio"
+                        style="padding: 6px; font-size: 0.8rem; margin-top: 2px;" onclick="chiudiModal()">
+                        Chiudi
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT GESTIONE MAPPA -->
+    <script>
+        const TARIFFA_BASSA = 15.00;
+        const TARIFFA_ALTA = 25.00;
+        const TOTALE_STALLI = 45;
+
+        let stalli = [];
+        let storicoAnagrafica = [];
+        let dataCorrente = new Date(); // Prende il mese e anno attuali del sistema
+
+        document.addEventListener('DOMContentLoaded', () => {
+            caricaDatiLocali();
+        });
+
+        async function caricaDatiLocali() {
+            try {
+                let stalliSalvati = await caricaStalliDB();
+
+                if (stalliSalvati && stalliSalvati.length > 0) {
+                    stalli = stalliSalvati;
+                } else {
+                    stalli = Array.from({ length: TOTALE_STALLI }, (_, i) => ({
+                        num_stallo: i + 1,
+                        prenotazioni: []
+                    }));
+                    for (let s of stalli) {
+                        await salvaStalloDB(s);
+                    }
+                }
+
+                storicoAnagrafica = await caricaStoricoDB();
+
+            } catch (err) {
+                console.error("Errore IndexedDB:", err);
+            }
+
+            renderGriglia();
+            caricaDatalistStorico();
+        }
+
+        function renderGriglia() {
+            const container = document.getElementById('grigliaStalli');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const annoSel = dataCorrente.getFullYear();
+            const meseSel = dataCorrente.getMonth();
+
+            // Primo e ultimo giorno del mese visualizzato (incluso l'intero giorno di fine)
+            const inizioMese = new Date(annoSel, meseSel, 1, 0, 0, 0);
+            const fineMese = new Date(annoSel, meseSel + 1, 0, 23, 59, 59);
+
+            const oggi = new Date();
+            oggi.setHours(0, 0, 0, 0);
+
+            const isMeseAttualeSolare = (annoSel === oggi.getFullYear() && meseSel === oggi.getMonth());
+
+            stalli.forEach(s => {
+                const numero = s.num_stallo || s.id;
+                const prens = s.prenotazioni || [];
+
+                // Filtra le prenotazioni che toccano il mese visualizzato
+                const prensDelMese = prens.filter(p => {
+                    const dal = new Date(p.dal + 'T00:00:00');
+                    const al = new Date(p.al + 'T23:59:59');
+                    return dal <= fineMese && al >= inizioMese;
+                });
+
+                // Controlla se oggi c'è sosta attiva
+                const occupatoOggi = prens.some(p => {
+                    const dal = new Date(p.dal + 'T00:00:00');
+                    const al = new Date(p.al + 'T23:59:59');
+                    return dal <= oggi && al >= oggi;
+                });
+
+                let statoAttuale = 'libero';
+                let classeExtra = '';
+                let badgeViola = '';
+
+                if (isMeseAttualeSolare && occupatoOggi) {
+                    statoAttuale = 'occupato';
+                    if (prensDelMese.some(p => new Date(p.dal + 'T00:00:00') > oggi)) {
+                        classeExtra = 'con-prenotazione-futura';
+                        badgeViola = '<span style="position: absolute; top: 4px; right: 4px; background: #7E22CE; width: 10px; height: 10px; border-radius: 50%; border: 1px solid white;" title="Prenotazioni presenti"></span>';
+                    }
+                } else if (prensDelMese.length > 0) {
+                    statoAttuale = 'prenotato';
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `stallo-card stato-${statoAttuale} ${classeExtra}`;
+                btn.style.position = 'relative';
+                btn.onclick = () => apriFormCliente(numero);
+
+                let testoStato = 'Libero';
+                if (statoAttuale === 'occupato') {
+                    testoStato = 'Occupato';
+                } else if (statoAttuale === 'prenotato') {
+                    testoStato = `${prensDelMese.length} Pren.`;
+                }
+
+                btn.innerHTML = `
+            ${badgeViola}
+            <span class="stallo-num">Stallo ${numero}</span>
+            <span class="stallo-stato">${testoStato}</span>
+        `;
+                container.appendChild(btn);
+            });
+        }
+
+        function apriFormCliente(idStallo) {
+            document.getElementById('modalCliente').style.display = 'flex';
+            document.getElementById('stalloSelezionato').value = idStallo;
+            document.getElementById('modalHeaderTitolo').innerText = `Stallo ${idStallo} - Gestione Prenotazioni`;
+
+            const s = stalli.find(item => (item.num_stallo === idStallo || item.id === idStallo));
+            const containerLista = document.getElementById('listaPrenotazioniStallo');
+            containerLista.innerHTML = '';
+
+            const prens = (s && Array.isArray(s.prenotazioni)) ? s.prenotazioni : [];
+            const oggiStr = new Date().toISOString().split('T')[0];
+
+            if (prens.length === 0) {
+                containerLista.innerHTML = '<small style="color: #64748b;">Nessuna prenotazione attiva.</small>';
+            } else {
+                prens.forEach((p, idx) => {
+                    const isOccupatoOggi = (p.dal <= oggiStr && p.al >= oggiStr);
+                    let bgColore = '#7E22CE';
+                    let etichettaStato = 'PRENOTATO';
+
+                    if (isOccupatoOggi || p.stato === 'occupato') {
+                        bgColore = '#991B1B';
+                        etichettaStato = 'IN SOSTA';
+                    } else if (p.stato === 'attesa') {
+                        bgColore = '#D97706';
+                        etichettaStato = 'IN ATTESA';
+                    }
+
+                    const div = document.createElement('div');
+                    div.style.cssText = `
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center; 
+                        background-color: ${bgColore}; 
+                        color: white; 
+                        padding: 6px 10px; 
+                        margin-bottom: 5px; 
+                        border-radius: 4px; 
+                        font-size: 0.8rem;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                    `;
+
+                    div.innerHTML = `
+                        <div>
+                            <span style="font-size: 0.65rem; background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 3px; font-weight: bold; margin-right: 4px;">
+                                ${etichettaStato}
+                            </span>
+                            <strong>${p.nome_cliente}</strong> 
+                            <span style="font-size: 0.75rem; opacity: 0.9;">(${p.dal} ➔ ${p.al})</span>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button onclick="caricaModificaPrenotazione(${idStallo}, ${idx})" 
+                                title="Modifica Prenotazione"
+                                style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 0.75rem;">
+                                ✏️
+                            </button>
+                            <button onclick="eliminaPrenotazione(${idStallo}, ${idx})" 
+                                title="Cancella Prenotazione"
+                                style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">
+                                ✕
+                            </button>
+                        </div>
+                    `;
+                    containerLista.appendChild(div);
+                });
+            }
+
+            document.getElementById('nomeCliente').value = '';
+            document.getElementById('targaCliente').value = '';
+            document.getElementById('emailCliente').value = '';
+
+            const oggi = new Date().toISOString().split('T')[0];
+            document.getElementById('dataArrivo').value = oggi;
+
+            let domani = new Date();
+            domani.setDate(domani.getDate() + 1);
+            document.getElementById('dataUscita').value = domani.toISOString().split('T')[0];
+
+            calcolaTotale();
+        }
+
+        async function eliminaPrenotazione(idStallo, index) {
+            if (confirm("Vuoi cancellare questa prenotazione?")) {
+                await rimuoviPrenotazioneStalloDB(idStallo, index);
+                await caricaDatiLocali();
+                apriFormCliente(idStallo);
+            }
+        }
+
+        async function caricaModificaPrenotazione(idStallo, index) {
+            const s = stalli.find(item => (item.num_stallo === idStallo || item.id === idStallo));
+            if (!s || !s.prenotazioni || !s.prenotazioni[index]) return;
+
+            const p = s.prenotazioni[index];
+
+            document.getElementById('nomeCliente').value = p.nome_cliente || '';
+            document.getElementById('targaCliente').value = p.targa || '';
+            document.getElementById('emailCliente').value = p.email || '';
+            document.getElementById('dataArrivo').value = p.dal;
+            document.getElementById('dataUscita').value = p.al;
+
+            calcolaTotale();
+
+            await rimuoviPrenotazioneStalloDB(idStallo, index);
+            await caricaDatiLocali();
+
+            document.getElementById('modalHeaderTitolo').innerText = `Stallo ${idStallo} - Modifica in corso...`;
+        }
+
+        async function registraStato(nuovoStato) {
+            const idStallo = parseInt(document.getElementById('stalloSelezionato').value);
+            const nome = document.getElementById('nomeCliente').value.trim();
+            const targa = document.getElementById('targaCliente').value.trim();
+            const email = document.getElementById('emailCliente').value.trim();
+            const dal = document.getElementById('dataArrivo').value;
+            const al = document.getElementById('dataUscita').value;
+
+            if (!nome || !dal || !al) {
+                alert("Compilare Nome, Data Arrivo e Data Uscita!");
+                return;
+            }
+
+            const nuovaPrenotazione = {
+                nome_cliente: nome,
+                targa: targa,
+                email: email,
+                dal: dal,
+                al: al,
+                stato: nuovoStato
+            };
+
+            const esito = await aggiungiPrenotazioneStalloDB(idStallo, nuovaPrenotazione);
+
+            if (esito) {
+                await caricaDatiLocali();
+                chiudiModal();
+            }
+        }
+
+        async function effettuaCheckOut() {
+            const idStallo = parseInt(document.getElementById('stalloSelezionato').value);
+            const s = stalli.find(item => (item.num_stallo === idStallo || item.id === idStallo));
+
+            if (!s || !s.prenotazioni || s.prenotazioni.length === 0) {
+                alert("Nessuna prenotazione o sosta attiva da liberare su questo stallo.");
+                return;
+            }
+
+            const oggiStr = new Date().toISOString().split('T')[0];
+            let index = s.prenotazioni.findIndex(p => p.dal <= oggiStr && p.al >= oggiStr);
+            if (index === -1) index = 0;
+
+            const cliente = s.prenotazioni[index];
+
+            if (confirm(`Confermi il Check-Out e il saldo per ${cliente.nome_cliente || 'il cliente'}? Lo stallo verrà liberato.`)) {
+                await rimuoviPrenotazioneStalloDB(idStallo, index);
+                await caricaDatiLocali();
+                chiudiModal();
+            }
+        }
+
+        function calcolaTotale() {
+            const arrivoVal = document.getElementById('dataArrivo').value;
+            const uscitaVal = document.getElementById('dataUscita').value;
+
+            if (!arrivoVal || !uscitaVal) return;
+
+            const arrivo = new Date(arrivoVal);
+            const uscita = new Date(uscitaVal);
+
+            if (uscita > arrivo) {
+                const diffDays = Math.ceil(Math.abs(uscita - arrivo) / (1000 * 60 * 60 * 24));
+                let nottiAlta = 0, nottiBassa = 0;
+                let tempDate = new Date(arrivo);
+
+                for (let i = 0; i < diffDays; i++) {
+                    const mese = tempDate.getMonth();
+                    if (mese === 6 || mese === 7) nottiAlta++;
+                    else nottiBassa++;
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+
+                const totale = (nottiAlta * TARIFFA_ALTA) + (nottiBassa * TARIFFA_BASSA);
+                document.getElementById('lblNotti').innerText = diffDays;
+                document.getElementById('lblCosto').innerText = '€ ' + totale.toFixed(2);
+            } else {
+                document.getElementById('lblNotti').innerText = '0';
+                document.getElementById('lblCosto').innerText = '€ 0.00';
+            }
+        }
+
+        function caricaDatalistStorico() {
+            const list = document.getElementById('storicoAnagrafica');
+            if (!list) return;
+            list.innerHTML = '';
+            storicoAnagrafica.forEach(nome => {
+                const opt = document.createElement('option');
+                opt.value = nome;
+                list.appendChild(opt);
+            });
+        }
+
+        function chiudiModal() {
+            document.getElementById('modalCliente').style.display = 'none';
+        }
+
+        function cambiaMese(delta) {
+            dataCorrente.setMonth(dataCorrente.getMonth() + delta);
+            const mesi = ["GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO", "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"];
+            document.getElementById('labelMese').innerText = `${mesi[dataCorrente.getMonth()]} ${dataCorrente.getFullYear()}`;
+
+            renderGriglia();
+        }
+    </script>
+
+    <!-- Inclusione Gestore Database Locale -->
+    <script src="db.js"></script>
+
+</body>
+
+</html>

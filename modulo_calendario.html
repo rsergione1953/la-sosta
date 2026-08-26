@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Stalli - AreaSosta</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .gantt-wrapper {
+            overflow-x: auto;
+            max-height: 75vh;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .gantt-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .gantt-table th,
+        .gantt-table td {
+            border-right: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 6px 4px;
+            min-width: 32px;
+            box-sizing: border-box;
+        }
+
+        /* Intestazione Giorni Fissa in Alto */
+        .gantt-table th {
+            background-color: #2D3748;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Colonna Stalli Fissa a Sinistra */
+        .col-stallo {
+            position: sticky;
+            left: 0;
+            background-color: #F1F5F9 !important;
+            color: #1E293B;
+            font-weight: bold;
+            min-width: 80px !important;
+            z-index: 5;
+            border-right: 2px solid #CBD5E1 !important;
+        }
+
+        /* Angolo in alto a sinistra */
+        th.col-stallo {
+            z-index: 15 !important;
+            background-color: #1A202C !important;
+        }
+
+        /* Colori Celle Stato */
+        .cell-occupato {
+            background-color: #EF4444;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cell-prenotato {
+            background-color: #9333EA;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cell-attesa {
+            background-color: #EAB308;
+            color: black;
+            font-weight: bold;
+        }
+
+        .cell-libero {
+            background-color: #FFFFFF;
+        }
+
+        .legend-container {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid #CBD5E1;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body style="background-color: #F7F4E9;">
+
+    <div class="container" style="max-width: 100%;">
+
+        <!-- HEADER FISSO IN ALTO -->
+        <header
+            style="position: sticky; top: 0; background-color: #F7F4E9; z-index: 100; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; margin-bottom: 15px;">
+            <a href="index.html"
+                style="text-decoration: none; background: #334155; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">
+                &lt;- Menu
+            </a>
+            <h1 style="font-size: 1.2rem; margin: 0; color: #4A3525;">CALENDARIO STALLI</h1>
+        </header>
+
+        <!-- Selettore Mese/Anno Dinamico -->
+        <div class="month-selector">
+            <button class="btn-nav-month" onclick="cambiaMese(-1)">&lt;</button>
+            <span class="month-title" id="labelMese">AGOSTO 2026</span>
+            <button class="btn-nav-month" onclick="cambiaMese(1)">&gt;</button>
+        </div>
+
+        <!-- Legenda Colori -->
+        <div class="legend-container">
+            <div class="legend-item">
+                <div class="legend-box" style="background:#EF4444;"></div> Occupato
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#9333EA;"></div> Prenotato
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#EAB308;"></div> Attesa
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#FFFFFF; border:1px solid #ccc;"></div> Libero
+            </div>
+        </div>
+
+        <!-- Griglia Tabellare Gantt -->
+        <div class="gantt-wrapper">
+            <table class="gantt-table">
+                <thead>
+                    <tr id="headerGiorni">
+                        <th class="col-stallo">Stallo</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyCalendario"></tbody>
+            </table>
+        </div>
+
+        <!-- Tasto Ritorno in Fondo -->
+        <a href="index.html" class="menu-btn btn-scuro" style="margin-top: 20px;">
+            <span class="btn-title">&lt;- TORNA AL MENU</span>
+        </a>
+
+    </div>
+
+    <!-- SCRIPT DATABASE LOCALE -->
+    <script src="db.js"></script>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        const totaleStalli = 45;
+        let dataCorrente = new Date(); // Prende la data reale odierna
+        let stalli = [];
+
+        const nomiMesi = [
+            "GENNAIO", "FEBBRAIO", "MARZO", "APRILE", "MAGGIO", "GIUGNO",
+            "LUGLIO", "AGOSTO", "SETTEMBRE", "OTTOBRE", "NOVEMBRE", "DICEMBRE"
+        ];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await aggiornaCalendario();
+        });
+
+        async function aggiornaCalendario() {
+            const mese = dataCorrente.getMonth();
+            const anno = dataCorrente.getFullYear();
+
+            // Aggiorna la label del mese
+            document.getElementById('labelMese').innerText = `${nomiMesi[mese]} ${anno}`;
+
+            // Calcola il numero di giorni del mese selezionato
+            const giorniNelMese = new Date(anno, mese + 1, 0).getDate();
+
+            generaIntestazioneGiorni(giorniNelMese);
+
+            try {
+                // Carica gli stalli dal database IndexedDB
+                stalli = await caricaStalliDB();
+                generaGrigliaCalendario(giorniNelMese, mese, anno);
+            } catch (err) {
+                console.error("Errore caricamento calendario IndexedDB:", err);
+            }
+        }
+
+        function generaIntestazioneGiorni(totGiorni) {
+            const tr = document.getElementById('headerGiorni');
+            tr.innerHTML = '<th class="col-stallo">Stallo</th>';
+
+            for (let g = 1; g <= totGiorni; g++) {
+                const th = document.createElement('th');
+                th.innerText = g;
+                tr.appendChild(th);
+            }
+        }
+
+        function generaGrigliaCalendario(totGiorni, meseIdx, annoNum) {
+            const tbody = document.getElementById('bodyCalendario');
+            tbody.innerHTML = '';
+
+            for (let s = 1; s <= totaleStalli; s++) {
+                const tr = document.createElement('tr');
+
+                const tdStallo = document.createElement('td');
+                tdStallo.className = 'col-stallo';
+                tdStallo.innerText = `Stallo ${s}`;
+                tr.appendChild(tdStallo);
+
+                const datiStallo = stalli.find(item => (item.num_stallo === s || item.id === s));
+                const prenotazioni = (datiStallo && datiStallo.prenotazioni) ? datiStallo.prenotazioni : [];
+
+                for (let g = 1; g <= totGiorni; g++) {
+                    const td = document.createElement('td');
+                    td.className = 'cell-libero';
+
+                    // Formatta la data del giorno della cella YYYY-MM-DD
+                    const mStr = String(meseIdx + 1).padStart(2, '0');
+                    const gStr = String(g).padStart(2, '0');
+                    const dataCellaStr = `${annoNum}-${mStr}-${gStr}`;
+
+                    // Cerca se esiste una prenotazione attiva in questa specifica data
+                    const prenAttiva = prenotazioni.find(p => p.dal <= dataCellaStr && p.al >= dataCellaStr);
+
+                    if (prenAttiva) {
+                        let stato = prenAttiva.stato || 'prenotato';
+                        td.className = `cell-${stato}`;
+                        td.title = `Stallo ${s}: ${prenAttiva.nome_cliente || 'Cliente'} (${stato.toUpperCase()})\nDal: ${prenAttiva.dal} Al: ${prenAttiva.al}`;
+                        td.innerText = prenAttiva.nome_cliente ? prenAttiva.nome_cliente.substring(0, 3).toUpperCase() : '';
+                    }
+
+                    td.onclick = () => {
+                        if (prenAttiva) {
+                            alert(`Stallo ${s} - ${g}/${meseIdx + 1}/${annoNum}\nCliente: ${prenAttiva.nome_cliente}\nTarga: ${prenAttiva.targa || 'N/D'}\nStato: ${prenAttiva.stato.toUpperCase()}`);
+                        } else {
+                            alert(`Stallo ${s} - ${g}/${meseIdx + 1}/${annoNum}\nStato: Libero`);
+                        }
+                    };
+
+                    tr.appendChild(td);
+                }
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function cambiaMese(delta) {
+            dataCorrente.setMonth(dataCorrente.getMonth() + delta);
+            await aggiornaCalendario();
+        }
+    </script>
+
+</body>
+
+</html>
